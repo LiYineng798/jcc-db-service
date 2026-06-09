@@ -41,3 +41,12 @@ def test_seed_migration_uses_postgres_conflict_handling():
 
     assert 'ON CONFLICT (cache_key) DO NOTHING' in sql
     assert 'ON CONFLICT (setting_key) DO NOTHING' in sql
+
+
+def test_site_notice_migration_preserves_existing_notice_data():
+    sql = Path('migrations/0003_site_notices.sql').read_text(encoding='utf-8')
+
+    assert 'CREATE TABLE IF NOT EXISTS site_notices' in sql
+    assert 'idx_site_notices_single_active' in sql
+    assert 'notice_data' in sql
+    assert 'notice_enabled' in sql

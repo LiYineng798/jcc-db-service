@@ -6,8 +6,7 @@ ENV_FILE="/root/.jcc-db.env"
 
 cd "$PROJECT_DIR"
 
-git fetch origin main
-git reset --hard origin/main
+git pull origin main
 
 source .venv/bin/activate
 pip install -r requirements.txt

@@ -64,3 +64,10 @@ def test_daily_report_migration_defines_report_snapshot_table():
     assert 'generated_at TEXT NOT NULL' in sql
     assert 'updated_at TEXT NOT NULL' in sql
     assert 'idx_daily_admin_reports_generated_at' in sql
+
+
+def test_visit_ip_migration_adds_daily_report_probe_indexes():
+    sql = Path('migrations/0008_visit_ip_index.sql').read_text(encoding='utf-8')
+
+    assert 'CREATE INDEX IF NOT EXISTS idx_visit_events_ip_date' in sql
+    assert 'CREATE INDEX IF NOT EXISTS idx_copy_action_events_ip_created_at' in sql

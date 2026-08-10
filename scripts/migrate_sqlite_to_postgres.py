@@ -25,6 +25,7 @@ TABLE_ORDER = [
     'growth_events',
     'guestbook_messages',
     'patch_notes',
+    'daily_admin_reports',
 ]
 
 IDENTITY_TABLES = {

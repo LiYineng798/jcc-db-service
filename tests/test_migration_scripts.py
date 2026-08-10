@@ -30,6 +30,7 @@ def test_table_order_includes_current_tables():
         'growth_events',
         'guestbook_messages',
         'patch_notes',
+        'daily_admin_reports',
     ]
 
 

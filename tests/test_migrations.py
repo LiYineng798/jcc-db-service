@@ -50,3 +50,17 @@ def test_site_notice_migration_preserves_existing_notice_data():
     assert 'idx_site_notices_single_active' in sql
     assert 'notice_data' in sql
     assert 'notice_enabled' in sql
+
+
+def test_daily_report_migration_defines_report_snapshot_table():
+    sql = Path('migrations/0007_daily_reports.sql').read_text(encoding='utf-8')
+
+    assert 'CREATE TABLE IF NOT EXISTS daily_admin_reports' in sql
+    assert 'report_date TEXT PRIMARY KEY' in sql
+    assert 'unique_visitors INTEGER NOT NULL DEFAULT 0' in sql
+    assert 'page_visits INTEGER NOT NULL DEFAULT 0' in sql
+    assert 'successful_copies INTEGER NOT NULL DEFAULT 0' in sql
+    assert 'payload_json TEXT NOT NULL' in sql
+    assert 'generated_at TEXT NOT NULL' in sql
+    assert 'updated_at TEXT NOT NULL' in sql
+    assert 'idx_daily_admin_reports_generated_at' in sql

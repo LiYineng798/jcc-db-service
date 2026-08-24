@@ -81,3 +81,11 @@ def test_live_comp_upload_migration_defines_progress_job_queue():
         assert f'{column} ' in sql
     assert 'idx_live_comp_upload_jobs_status_created_at' in sql
     assert 'idx_live_comp_upload_jobs_created_by_created_at' in sql
+
+
+def test_audit_target_key_migration_supports_text_identifiers():
+    sql = Path('migrations/0010_audit_target_key.sql').read_text(encoding='utf-8')
+
+    assert 'ALTER TABLE audit_logs' in sql
+    assert 'ADD COLUMN IF NOT EXISTS target_key TEXT' in sql
+    assert 'idx_audit_logs_target_key' in sql

@@ -71,3 +71,13 @@ def test_visit_ip_migration_adds_daily_report_probe_indexes():
 
     assert 'CREATE INDEX IF NOT EXISTS idx_visit_events_ip_date' in sql
     assert 'CREATE INDEX IF NOT EXISTS idx_copy_action_events_ip_created_at' in sql
+
+
+def test_live_comp_upload_migration_defines_progress_job_queue():
+    sql = Path('migrations/0009_live_comp_upload_jobs.sql').read_text(encoding='utf-8')
+
+    assert 'CREATE TABLE IF NOT EXISTS live_comp_upload_jobs' in sql
+    for column in ['status', 'stage', 'input_path', 'uploaded_bytes', 'item_done', 'image_done', 'result_json', 'error_message']:
+        assert f'{column} ' in sql
+    assert 'idx_live_comp_upload_jobs_status_created_at' in sql
+    assert 'idx_live_comp_upload_jobs_created_by_created_at' in sql

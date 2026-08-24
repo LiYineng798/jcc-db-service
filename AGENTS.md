@@ -9,3 +9,5 @@ The parent `..\` directory is only a local coordination workspace and may also c
 For database changes, add SQL migrations under `migrations/` and focused tests under `tests/`. If Web code depends on the DB change, commit and deploy this repository first, then update `jcc-web-service`.
 
 Migration `0009_live_comp_upload_jobs.sql` adds the administrator live-comp JSON upload job queue. It must remain schema-compatible with the Web service's SQLite `live_comp_upload_jobs` table in `db_schema.py`/`db_migrations.py`, including status/progress fields, result/error JSON, creator, and timestamps. The Web worker claims queued rows conditionally, so the indexes on `(status, created_at)` and `(created_by, created_at DESC)` are required for polling and audit views.
+
+Migration `0010_audit_target_key.sql` adds the text `audit_logs.target_key` column and index. Numeric entity IDs continue using `target_id`; seasons, dates, UUID jobs, and composite identifiers use `target_key`. Keep this migration aligned with the Web SQLite backfill and audit serializer before deploying Web code that writes text targets.

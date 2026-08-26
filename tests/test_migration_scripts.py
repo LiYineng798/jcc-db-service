@@ -15,6 +15,7 @@ def test_table_order_includes_current_tables():
         'likes',
         'copy_events',
         'copy_action_events',
+        'live_comp_copy_events',
         'live_comp_global_stats',
         'live_comp_global_daily_stats',
         'cache_state',
@@ -41,3 +42,4 @@ def test_identity_tables_exclude_text_primary_key_tables():
     assert 'app_settings' not in IDENTITY_TABLES
     assert 'live_comp_global_stats' not in IDENTITY_TABLES
     assert 'live_comp_global_daily_stats' not in IDENTITY_TABLES
+    assert 'live_comp_copy_events' in IDENTITY_TABLES

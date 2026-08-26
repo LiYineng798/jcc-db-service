@@ -89,3 +89,11 @@ def test_audit_target_key_migration_supports_text_identifiers():
     assert 'ALTER TABLE audit_logs' in sql
     assert 'ADD COLUMN IF NOT EXISTS target_key TEXT' in sql
     assert 'idx_audit_logs_target_key' in sql
+
+
+def test_live_comp_copy_dedup_migration_defines_five_minute_claim_table():
+    sql = Path('migrations/0011_live_comp_copy_dedup.sql').read_text(encoding='utf-8')
+
+    assert 'CREATE TABLE IF NOT EXISTS live_comp_copy_events' in sql
+    assert 'UNIQUE(season_id, live_comp_id, copy_key, bucket_start)' in sql
+    assert 'idx_live_comp_copy_events_target_created_at' in sql

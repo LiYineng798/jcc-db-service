@@ -13,3 +13,5 @@ Migration `0009_live_comp_upload_jobs.sql` adds the administrator live-comp JSON
 Migration `0010_audit_target_key.sql` adds the text `audit_logs.target_key` column and index. Numeric entity IDs continue using `target_id`; seasons, dates, UUID jobs, and composite identifiers use `target_key`. Keep this migration aligned with the Web SQLite backfill and audit serializer before deploying Web code that writes text targets.
 
 Migration `0011_live_comp_copy_dedup.sql` adds `live_comp_copy_events`, the five-minute effective-copy claim table for real-time lineups. Its unique key is `(season_id, live_comp_id, copy_key, bucket_start)` so repeated actions remain visible in `copy_action_events` while only the first copy in a bucket increments public counters. Keep it aligned with the Web SQLite schema and backfill.
+
+Migration `0013_guestbook_message_status.sql` adds read/archive workflow fields to `guestbook_messages`. The Web admin uses `unread`, `read`, and `archived` statuses, with nullable actor/timestamp fields and an index on `(status, created_at DESC)`.

@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+Migration `0014_user_avatars.sql` adds `users.avatar_color`, backfills existing users with random system colors, and enforces a six-digit hexadecimal color. Apply it before deploying Web avatar support. Existing SQLite imports without this field use the default color; imports with the field preserve it. Only colors are stored; fixed SVG geometry belongs to the Web service. Do not store image uploads or runtime image blobs for this feature.
+
 This is the database service repository for the JCC workspace. It owns PostgreSQL schema migrations, SQLite-to-PostgreSQL import tooling, integrity checks, backups, restores, and database operations runbooks.
 
 The sibling `..\jcc-web-service` repository owns Flask routes, Web/API behavior, frontend assets, account permissions, live comp display, admin UI, guestbook, patch notes, and Web-side database adapters. Do not edit Web-service files from this repository.

@@ -1,6 +1,15 @@
 from pathlib import Path
 
 
+def test_user_avatar_migration_backfills_before_enforcing_color_constraint():
+    sql = Path('migrations/0014_user_avatars.sql').read_text(encoding='utf-8')
+    assert 'ADD COLUMN IF NOT EXISTS avatar_color TEXT' in sql
+    assert 'WHERE avatar_color IS NULL' in sql
+    assert sql.index('UPDATE users') < sql.index('SET NOT NULL')
+    assert "CHECK (avatar_color ~ '^#[0-9a-fA-F]{6}$')" in sql
+    assert 'random() * 8' in sql
+
+
 def test_initial_migration_defines_schema_migrations_table():
     sql = Path('migrations/0001_initial_schema.sql').read_text(encoding='utf-8')
 

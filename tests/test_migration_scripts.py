@@ -32,6 +32,10 @@ def test_table_order_includes_current_tables():
         'guestbook_messages',
         'patch_notes',
         'daily_admin_reports',
+        'season_release_packages',
+        'season_import_jobs',
+        'season_active_releases',
+        'season_release_events',
     ]
 
 

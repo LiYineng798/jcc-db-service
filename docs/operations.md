@@ -210,3 +210,12 @@ When a release includes both database and Web changes:
 6. Run Web smoke tests.
 
 This keeps the database schema ahead of Web code that depends on it.
+
+
+## Season upload release metadata (0015)
+
+Deploy migration 0015 before the corresponding Web branch. It adds only package, job, active pointer and event tables; it does not rewrite existing user data. The Web worker shares the existing database and a persistent, private package directory. SQLite-to-PostgreSQL migration and count checks include the four new tables, preserving text release IDs and user foreign keys. Copy the corresponding Web package directory when migrating; table rows alone cannot restore ZIPs or images.
+
+Integrity checks now reject active releases for the wrong season, unready/unpublished targets, invalid previous targets and packages without jobs. After migration, run the normal integrity command. On this development host the migration was tested for portable constraints but no local PostgreSQL instance was available; production must run the real migration and integrity checks before Web startup.
+
+For a consistent backup/restore, pause administrative writes and stop the Web and season worker while taking the existing PostgreSQL backup plus Web uploads/releases and season visibility configuration. Restore files and database before restarting. Data-only rollback uses version pointers and should not restore the entire user database. Retain all referenced files, including rollback targets. See the Web repository docs/season-package-operations.md for worker and Nginx configuration.

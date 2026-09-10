@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+Migration `0015_season_release_packages.sql` adds season_release_packages, season_import_jobs, season_active_releases and season_release_events for offline admin uploads, worker leases, version pointers and publication history. Apply before deploying the matching Web feature. SQLite import/count verification now includes these text-ID tables after users; integrity checks verify active/previous season ownership and ready/published state. Package images/ZIPs stay in the Web persistent directory, not PostgreSQL; backup/restore must include both. See Web docs/season-package-operations.md. Daily season publishing does not require a new migration.
+
 Migration `0014_user_avatars.sql` adds `users.avatar_color`, backfills existing users with random system colors, and enforces a six-digit hexadecimal color. Apply it before deploying Web avatar support. Existing SQLite imports without this field use the default color; imports with the field preserve it. Only colors are stored; fixed SVG geometry belongs to the Web service. Do not store image uploads or runtime image blobs for this feature.
 
 This is the database service repository for the JCC workspace. It owns PostgreSQL schema migrations, SQLite-to-PostgreSQL import tooling, integrity checks, backups, restores, and database operations runbooks.

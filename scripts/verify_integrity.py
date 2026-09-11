@@ -5,6 +5,20 @@ import psycopg
 
 
 CHECKS = [
+    ('active season release matches season and is ready', '''
+        SELECT COUNT(*) FROM season_active_releases a
+        LEFT JOIN season_release_packages p ON p.id=a.release_id
+        WHERE a.release_id IS NOT NULL AND (p.id IS NULL OR p.season_id<>a.season_id OR p.state<>'ready' OR p.published_at IS NULL)
+    '''),
+    ('previous season release matches season and was published', '''
+        SELECT COUNT(*) FROM season_active_releases a
+        LEFT JOIN season_release_packages p ON p.id=a.previous_release_id
+        WHERE a.previous_release_id IS NOT NULL AND (p.id IS NULL OR p.season_id<>a.season_id OR p.published_at IS NULL)
+    '''),
+    ('every season release has an import job', '''
+        SELECT COUNT(*) FROM season_release_packages p
+        LEFT JOIN season_import_jobs j ON j.release_id=p.id WHERE j.id IS NULL
+    '''),
     (
         'lineups.user_id -> users.id',
         '''

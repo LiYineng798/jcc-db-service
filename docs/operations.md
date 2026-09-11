@@ -11,17 +11,19 @@ Web application code lives in `jcc-web-service`.
 
 | Item | Value |
 |---|---|
-| Database server | `103.23.148.85` |
+| Database server | `114.134.186.41` (co-located with Web) |
 | Database service directory | `/opt/jcc/jcc-db-service` |
 | PostgreSQL database | `jcc` |
 | PostgreSQL app user | `jcc_app` |
 | PostgreSQL service | `postgresql` |
 | Firewall service | `nftables` |
-| Secret env file | `/root/.jcc-db.env` |
+| Secret env file | `/etc/jcc.env` |
 | Backup directory | `/opt/jcc/postgres-backups` |
-| Web server allowed to connect | `103.23.148.135` |
+| Web database connection | `127.0.0.1:5432`; PostgreSQL also listens on `::1` |
 
 Do not commit database passwords or SSH passwords.
+
+These production facts were verified on 2026-09-11. Migration 0015 and the initial S18 package passed real PostgreSQL publication/rollback and integrity checks; see Web `docs/season-package-production-deployment.md`. Older split-host firewall and `/root/.jcc-db.env` command examples below are historical: use `/etc/jcc.env` and the co-located deployment runbook, and do not open a public database port.
 
 ## What This Repository Owns
 
@@ -166,7 +168,9 @@ python scripts/verify_integrity.py --database-url "$JCC_DATABASE_URL"
 
 Do not use `--truncate-target` while the Web service is accepting writes.
 
-## Connectivity And Firewall
+## Historical Split-Host Connectivity And Firewall
+
+This section applies only if a separate DB host is reintroduced. Current production listens on loopback; the old addresses below must not be applied to the co-located host.
 
 PostgreSQL should only be reachable from trusted Web servers.
 

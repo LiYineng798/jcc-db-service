@@ -2,7 +2,11 @@
 
 This service owns PostgreSQL deployment, migrations, backup, restore, and SQLite import tooling for JCC.
 
-## Current Production Facts
+## Current Production
+
+Updated 2026-09-11: Web and PostgreSQL are co-located at `114.134.186.41`; use `/etc/jcc.env` and `127.0.0.1:5432/jcc`. Migration 0015 and real publish/rollback/integrity checks passed. The split-host facts and first-install commands below describe the previous topology, not the current deployment; follow the Web `docs/server-update-guide.md` and `docs/season-package-production-deployment.md` for current operations.
+
+## Historical Split-Host Deployment
 
 - Database host: `103.23.148.85`, Debian 12.
 - Database service path: `/opt/jcc/jcc-db-service`.

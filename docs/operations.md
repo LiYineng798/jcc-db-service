@@ -1,5 +1,7 @@
 # JCC Database Operations
 
+Season data maintenance follows the Web repository's `docs/season-maintenance-playbook.md`. After migration 0015 is deployed, creating a season or publishing a game patch/data revision normally requires no additional DB migration. Keep backups of both PostgreSQL package metadata and the Web package directory. Offline S99 lifecycle tests use temporary SQLite; run this repository's migrations and integrity checks separately on the real PostgreSQL deployment.
+
 This repository is the source of truth for PostgreSQL schema migrations, data
 imports, integrity checks, and database backup/restore tooling.
 

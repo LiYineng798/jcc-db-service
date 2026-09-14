@@ -28,7 +28,7 @@ def database():
 
 def test_migration_executes_and_enforces_state_proposal_and_ownership():
     db = database()
-    for sql in ["UPDATE lineup_moderation SET state='anything'", "UPDATE lineup_moderation SET notice_state='anything'", "UPDATE lineup_moderation SET prior_status='banned'", "UPDATE lineup_moderation SET state='pending'", "UPDATE lineup_moderation SET lineup_id=99"]:
+    for sql in ["UPDATE lineup_moderation SET state='anything'", "UPDATE lineup_moderation SET notice_state='anything'", "UPDATE lineup_moderation SET notice_state='archived'", "UPDATE lineup_moderation SET prior_status='banned'", "UPDATE lineup_moderation SET state='pending'", "UPDATE lineup_moderation SET lineup_id=99"]:
         with pytest.raises(sqlite3.IntegrityError):
             db.execute(sql)
         db.rollback()

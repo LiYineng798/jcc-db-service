@@ -2,10 +2,10 @@
 
 迁移 `0016_lineup_moderation.sql` 必须在对应 Web 版本上线前应用。新增两张表：
 
-- `lineup_moderation`：每个阵容当前的封禁/待审/退回/通过/解除状态、原因、封禁前展示状态、用户提交版本、审核说明和用户通知已读/归档状态。
+- `lineup_moderation`：每个阵容当前的封禁/待审/退回/通过/解除状态、原因、封禁前展示状态、用户提交版本、审核说明和用户通知已读状态。
 - `lineup_moderation_events`：按顺序保留操作者、动作、原因、提交前后快照和时间。软删除阵容不会删除记录。
 
-原有 `lineups.status` 使用 `banned` 表示整个限制期间，`version` 执行条件更新并防止旧页面覆盖审核；原始阵容字段只在审核通过时替换。封禁前为 hidden 的阵容恢复后继续隐藏。通知状态有独立 `revision`，不会改变审核版本。
+原有 `lineups.status` 使用 `banned` 表示整个限制期间，`version` 执行条件更新并防止旧页面覆盖审核；原始阵容字段只在审核通过时替换。封禁前为 hidden 的阵容恢复后继续隐藏。用户通知仅保留 unread/read，已移除归档状态。通知状态有独立 `revision`，不会改变审核版本。
 
 SQLite 导入顺序为 users → lineups → lineup_moderation → lineup_moderation_events，事件表恢复 identity 序列；旧 SQLite 没有新表时跳过对应导入。计数校验沿用共享 TABLE_ORDER。完整性检查增加封禁状态一致性及事件的作者/阵容引用检查。
 

@@ -7,6 +7,8 @@ import psycopg
 TABLE_ORDER = [
     'users',
     'lineups',
+    'lineup_moderation',
+    'lineup_moderation_events',
     'likes',
     'copy_events',
     'copy_action_events',
@@ -34,6 +36,7 @@ TABLE_ORDER = [
 ]
 
 IDENTITY_TABLES = {
+    'lineup_moderation_events',
     'users',
     'lineups',
     'likes',

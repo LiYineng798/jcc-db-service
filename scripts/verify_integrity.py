@@ -100,6 +100,16 @@ CHECKS = [
         WHERE child.ref_lineup_id IS NOT NULL AND parent.id IS NULL
         ''',
     ),
+    ('moderation restriction matches lineup status', '''
+        SELECT COUNT(*) FROM lineups l LEFT JOIN lineup_moderation m ON m.lineup_id=l.id
+        WHERE (l.status='banned' AND (m.lineup_id IS NULL OR m.state NOT IN ('banned','pending','rejected')))
+           OR (m.state IN ('banned','pending','rejected') AND l.status<>'banned')
+    '''),
+    ('moderation events reference existing lineups and actors', '''
+        SELECT COUNT(*) FROM lineup_moderation_events e
+        LEFT JOIN lineups l ON l.id=e.lineup_id LEFT JOIN users u ON u.id=e.actor_user_id
+        WHERE l.id IS NULL OR u.id IS NULL
+    '''),
 ]
 
 

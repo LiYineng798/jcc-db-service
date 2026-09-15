@@ -1,27 +1,13 @@
-# Repository Guidelines
+# DB 开发约定
 
-Migration `0016_lineup_moderation.sql` adds lineup_moderation and lineup_moderation_events for ordinary lineup bans, immutable pending proposals, review decisions, and author read/unread notifications. Apply before the matching Web version. Keep the SQLite schema in Web lineup_moderation_schema.py aligned. Imports order both tables after users/lineups, reset the events identity, and retain history; integrity checks validate restricted states against lineups.status and event references. No new production configuration. See `docs/lineup-moderation.md`. The user approved this feature for local main integration on 2026-09-14. Migration 0016 was applied to production on 114.134.186.41 at 2026-09-14 15:07:33 after isolated real-PostgreSQL lifecycle verification; production integrity and HTTPS checks passed. The consistent backup is /opt/jcc/deploy-backups/lineup-moderation-20260914-150418/. See Web docs/lineup-moderation-production-deployment.md. Always apply this migration before deploying the matching Web version.
+本仓库只负责 PostgreSQL schema、SQLite 导入、完整性检查与数据库运维。
+Flask/API/前端以及 SQLite 适配属于相邻 Web 仓库。
 
-Production migration 0015 was applied and passed real PostgreSQL integrity checks on 2026-09-11 at `114.134.186.41`. PostgreSQL and Web now share this host; DB connections use loopback and `/etc/jcc.env`. Historical 103.23.148.* split-host facts are obsolete. See the Web repository's `docs/season-package-production-deployment.md` for initial S18 release and consistent pre/post-deployment backup locations.
-
-Season creation, official patch updates and same-patch corrections follow the Web repository's `docs/season-maintenance-playbook.md`. A new season alone needs no new PostgreSQL table or migration after 0015; Web catalog registration, live-comp classification, and data publication are separate steps. Complete ZIPs remain the supported transport; delta/compression changes are deferred. The Web S99 rehearsal copies existing S18 data into temporary SQLite/files and never represents production PostgreSQL acceptance or real future-season data.
-
-Migration `0015_season_release_packages.sql` adds season_release_packages, season_import_jobs, season_active_releases and season_release_events for offline admin uploads, worker leases, version pointers and publication history. Apply before deploying the matching Web feature. SQLite import/count verification now includes these text-ID tables after users; integrity checks verify active/previous season ownership and ready/published state. Package images/ZIPs stay in the Web persistent directory, not PostgreSQL; backup/restore must include both. See Web docs/season-package-operations.md. Daily season publishing does not require a new migration.
-
-Migration `0014_user_avatars.sql` adds `users.avatar_color`, backfills existing users with random system colors, and enforces a six-digit hexadecimal color. Apply it before deploying Web avatar support. Existing SQLite imports without this field use the default color; imports with the field preserve it. Only colors are stored; fixed SVG geometry belongs to the Web service. Do not store image uploads or runtime image blobs for this feature.
-
-This is the database service repository for the JCC workspace. It owns PostgreSQL schema migrations, SQLite-to-PostgreSQL import tooling, integrity checks, backups, restores, and database operations runbooks.
-
-The sibling `..\jcc-web-service` repository owns Flask routes, Web/API behavior, frontend assets, account permissions, live comp display, admin UI, guestbook, patch notes, and Web-side database adapters. Do not edit Web-service files from this repository.
-
-The parent `..\` directory is only a local coordination workspace and may also contain delivery artifacts such as `.sqlite3`, `.tar`, `.bundle`, or worktree files. Do not use the parent repository for normal feature commits.
-
-For database changes, add SQL migrations under `migrations/` and focused tests under `tests/`. If Web code depends on the DB change, commit and deploy this repository first, then update `jcc-web-service`.
-
-Migration `0009_live_comp_upload_jobs.sql` adds the administrator live-comp JSON upload job queue. It must remain schema-compatible with the Web service's SQLite `live_comp_upload_jobs` table in `db_schema.py`/`db_migrations.py`, including status/progress fields, result/error JSON, creator, and timestamps. The Web worker claims queued rows conditionally, so the indexes on `(status, created_at)` and `(created_by, created_at DESC)` are required for polling and audit views.
-
-Migration `0010_audit_target_key.sql` adds the text `audit_logs.target_key` column and index. Numeric entity IDs continue using `target_id`; seasons, dates, UUID jobs, and composite identifiers use `target_key`. Keep this migration aligned with the Web SQLite backfill and audit serializer before deploying Web code that writes text targets.
-
-Migration `0011_live_comp_copy_dedup.sql` adds `live_comp_copy_events`, the five-minute effective-copy claim table for real-time lineups. Its unique key is `(season_id, live_comp_id, copy_key, bucket_start)` so repeated actions remain visible in `copy_action_events` while only the first copy in a bucket increments public counters. Keep it aligned with the Web SQLite schema and backfill.
-
-Migration `0013_guestbook_message_status.sql` adds read/archive workflow fields to `guestbook_messages`. The Web admin uses `unread`, `read`, and `archived` statuses, with nullable actor/timestamp fields and an index on `(status, created_at DESC)`.
+- 启动、验证和文档入口见 [README](README.md)，实际操作见 [运维](docs/operations.md)。
+- 新结构增加递增编号的 SQL migration；已应用迁移不能改名或改写。迁移按文件名顺序执行并记录在 `schema_migrations`。
+- 同步 Web 的 `db_schema.py`、`db_migrations.py` 及专项 schema 模块；跨服务变更分别提交，先迁移 DB，再部署 Web。
+- 新表同时检查导入的 `TABLE_ORDER`、identity 恢复和完整性查询。源端缺表可跳过不等于完整迁移。
+- 赛季发布表只存元数据；恢复须包含 Web 持久文件。阵容审核状态必须与 `lineups.status` 一致，不能让旧 Web 绕过封禁。
+- 不提交数据库、dump、凭据、日志或环境文件，不清理其他 worktree 和交付资料。
+- 结构/工具变更补充聚焦测试，运行 `python -m pytest -q` 和 `git diff --check`。本地测试主要使用 SQLite 可移植 SQL及连接替身，不能替代真实 PostgreSQL 迁移与恢复演练。
+- README/AGENTS 只保留长期入口和约束；不重复列出每张表、每次部署和验收结果。部署前核实现况，不从历史记录推断已上线版本。

@@ -110,6 +110,10 @@ CHECKS = [
         LEFT JOIN lineups l ON l.id=e.lineup_id LEFT JOIN users u ON u.id=e.actor_user_id
         WHERE l.id IS NULL OR u.id IS NULL
     '''),
+    ('search_events.user_id -> users.id', '''
+        SELECT COUNT(*) FROM search_events e LEFT JOIN users u ON u.id=e.user_id
+        WHERE e.user_id IS NOT NULL AND u.id IS NULL
+    '''),
 ]
 
 

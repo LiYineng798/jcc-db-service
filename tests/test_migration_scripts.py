@@ -28,6 +28,7 @@ def test_table_order_includes_current_tables():
         'recent_lineup_copies',
         'login_events',
         'visit_events',
+        'search_events',
         'audit_logs',
         'rate_limits',
         'growth_events',

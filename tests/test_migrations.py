@@ -10,6 +10,41 @@ def test_user_avatar_migration_backfills_before_enforcing_color_constraint():
     assert 'random() * 8' in sql
 
 
+def test_avatar_config_migration_backfills_only_nulls_before_constraints():
+    sql = Path('migrations/0018_avatar_config.sql').read_text(encoding='utf-8')
+    assert 'ADD COLUMN IF NOT EXISTS avatar_preset TEXT' in sql
+    assert 'ADD COLUMN IF NOT EXISTS avatar_expression TEXT' in sql
+    assert 'WHERE avatar_preset IS NULL' in sql
+    assert 'WHERE avatar_expression IS NULL' in sql
+    assert sql.count('random() * 4') == 2
+    assert sql.index('WHERE avatar_expression IS NULL') < sql.index('SET NOT NULL')
+    assert "avatar_preset SET DEFAULT 'strobi'" in sql
+    assert "avatar_expression SET DEFAULT 'neutral'" in sql
+    assert 'avatar_preset SET NOT NULL' in sql
+    assert 'avatar_expression SET NOT NULL' in sql
+    assert "CHECK (avatar_preset IN ('strobi','freddy','citrus','nova'))" in sql
+    assert "CHECK (avatar_expression IN ('neutral','happy','wink','sleepy'))" in sql
+    assert 'SET avatar_color' not in sql
+    assert 'ALTER COLUMN avatar_color' not in sql
+
+
+def test_avatar_preset_expansion_keeps_saved_values():
+    sql = Path('migrations/0019_avatar_preset_expansion.sql').read_text(encoding='utf-8')
+    assert 'DROP CONSTRAINT users_avatar_preset_allowed' in sql
+    assert "CHECK (avatar_preset IN ('strobi','freddy','citrus','nova','sunee','cloudee','sprout','bloom'))" in sql
+    assert 'UPDATE users' not in sql
+    assert 'avatar_color' not in sql
+
+
+def test_avatar_expression_expansion_keeps_saved_values():
+    sql = Path('migrations/0020_avatar_expression_expansion.sql').read_text(encoding='utf-8')
+    assert 'DROP CONSTRAINT users_avatar_expression_allowed' in sql
+    assert "CHECK (avatar_expression IN ('neutral','happy','wink','sleepy','curious','surprised','shy','determined'))" in sql
+    assert 'UPDATE users' not in sql
+    assert 'avatar_color' not in sql
+    assert 'avatar_preset' not in sql
+
+
 def test_initial_migration_defines_schema_migrations_table():
     sql = Path('migrations/0001_initial_schema.sql').read_text(encoding='utf-8')
 

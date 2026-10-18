@@ -40,3 +40,18 @@ def test_feedback_import_order_and_identity_tables():
     assert TABLE_ORDER.index('user_notifications')>TABLE_ORDER.index('feedback_threads')
     assert {'feedback_threads','feedback_events','user_notifications'} <= IDENTITY_TABLES
     assert 'author_favorite_receipts' not in IDENTITY_TABLES
+
+
+def test_actor_migration_preserves_unique_members_and_cascades():
+    db=sqlite3.connect(':memory:')
+    db.execute('PRAGMA foreign_keys=ON')
+    db.executescript('CREATE TABLE users(id INTEGER PRIMARY KEY); CREATE TABLE user_notifications(id INTEGER PRIMARY KEY); INSERT INTO users VALUES(1); INSERT INTO user_notifications VALUES(2);')
+    sql=Path('migrations/0022_notification_actors.sql').read_text(encoding='utf-8')
+    db.executescript(sql)
+    db.execute("INSERT INTO notification_actors VALUES(2,1,'now')")
+    db.executescript(sql)
+    assert db.execute('SELECT COUNT(*) FROM notification_actors').fetchone()[0]==1
+    db.execute('DELETE FROM user_notifications WHERE id=2')
+    assert db.execute('SELECT COUNT(*) FROM notification_actors').fetchone()[0]==0
+    assert TABLE_ORDER.index('notification_actors')>TABLE_ORDER.index('user_notifications')
+    assert 'notification_actors' not in IDENTITY_TABLES

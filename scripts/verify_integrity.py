@@ -124,6 +124,8 @@ CHECKS = [
     ('notification read count is bounded', 'SELECT COUNT(*) FROM user_notifications WHERE read_count>event_count'),
     ('favorite receipts reference users and lineups', 'SELECT COUNT(*) FROM author_favorite_receipts r LEFT JOIN users u ON u.id=r.user_id LEFT JOIN lineups l ON l.id=r.lineup_id WHERE u.id IS NULL OR l.id IS NULL'),
 
+    ('notification actors reference interaction notices and users', "SELECT COUNT(*) FROM notification_actors a LEFT JOIN user_notifications n ON n.id=a.notification_id LEFT JOIN users u ON u.id=a.actor_user_id WHERE n.id IS NULL OR u.id IS NULL OR n.kind NOT IN ('like','favorite','copy') OR n.user_id=a.actor_user_id"),
+
 ]
 
 

@@ -40,6 +40,7 @@ def test_table_order_includes_current_tables():
         'feedback_threads',
         'feedback_events',
         'user_notifications',
+        'notification_actors',
         'author_favorite_receipts',
         'patch_notes',
         'daily_admin_reports',

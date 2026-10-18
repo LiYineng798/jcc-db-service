@@ -28,6 +28,10 @@ TABLE_ORDER = [
     'rate_limits',
     'growth_events',
     'guestbook_messages',
+    'feedback_threads',
+    'feedback_events',
+    'user_notifications',
+    'author_favorite_receipts',
     'patch_notes',
     'daily_admin_reports',
     'season_release_packages',
@@ -37,6 +41,9 @@ TABLE_ORDER = [
 ]
 
 IDENTITY_TABLES = {
+    'feedback_threads',
+    'feedback_events',
+    'user_notifications',
     'lineup_moderation_events',
     'users',
     'lineups',

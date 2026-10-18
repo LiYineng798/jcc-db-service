@@ -1,7 +1,7 @@
 # PostgreSQL 运维
 
-跨服务流程、已记录的生产拓扑和恢复点统一在 [Web 运维](../../jcc-web-service/docs/operations.md)。
-这里维护 DB 结构、校验与恢复命令，不再保留旧分离主机的 IP/环境路径。
+通用跨服务更新流程见 [Web 运维](../../jcc-web-service/docs/operations.md)。
+本文只维护可公开的结构、校验与恢复命令；真实拓扑、部署路径和恢复记录存放在私有运维系统，见 [仓库安全](repository-security.md)。
 
 ## 初次安装
 
@@ -9,14 +9,18 @@
 同机部署监听 loopback；分离部署需同时配置可信网络、pg_hba 和防火墙，不开放公网 5432。
 
 创建数据库与拥有 schema 权限的应用角色，凭据只存受限环境文件。
-CLI 均显式要求 --database-url，不自动加载 .env。生产已记录环境为 /etc/jcc.env。
+CLI 均显式要求 --database-url，不自动加载 .env。私有环境文件位置由 JCC_DB_ENV_FILE 显式指定。
+
+以下变量由操作者在受控环境设置，不在公共仓库记录真实值：
 
 ```bash
-cd /opt/jcc/jcc-db-service
+: "${JCC_DB_DIR:?Set the DB repository directory}"
+: "${JCC_DB_ENV_FILE:?Set an absolute private environment file path}"
+cd "$JCC_DB_DIR"
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 set -a
-. /etc/jcc.env
+. "$JCC_DB_ENV_FILE"
 set +a
 .venv/bin/python scripts/apply_migrations.py --database-url "$JCC_DATABASE_URL"
 .venv/bin/python scripts/verify_integrity.py --database-url "$JCC_DATABASE_URL"
@@ -41,8 +45,9 @@ psql "$JCC_DATABASE_URL" -c 'SELECT version, applied_at FROM schema_migrations O
   处理事件保留。详细业务规则只在 [Web 审核文档](../../jcc-web-service/docs/lineup-moderation.md) 维护。
 
 更新顺序：一致备份/停写 → DB 迁移及完整性 → Web/worker → 验收。
-deploy/update.sh 只辅助拉取/迁移/检查，不做备份或服务停写；默认环境 /etc/jcc.env，
-可通过 JCC_DB_ENV_FILE 指定其它受限文件。
+deploy/update.sh 只辅助拉取/迁移/检查，不做备份或服务停写；在脚本所属的仓库中执行，
+运行前必须通过 JCC_DB_ENV_FILE 指定可读的绝对环境文件路径，文件内必须设置 JCC_DATABASE_URL。
+缺少配置会在拉取、安装依赖或迁移前失败，不再使用固定生产路径。
 
 ## 备份与恢复
 
@@ -50,11 +55,14 @@ PostgreSQL dump 可获得 DB 一致快照；要让磁盘文件匹配，停写并
 同时归档 instance、私有赛季资料、代码/静态基准和配置。命令在已加载环境后执行：
 
 ```bash
-pg_dump "$JCC_DATABASE_URL" -Fc -f /opt/jcc/postgres-backups/jcc-before.dump
-pg_restore --list /opt/jcc/postgres-backups/jcc-before.dump
+: "${BACKUP_DIR:?Set the private backup parent directory}"
+umask 077
+BACKUP_RUN="$(mktemp -d "$BACKUP_DIR/release-XXXXXXXX")"
+pg_dump "$JCC_DATABASE_URL" -Fc -f "$BACKUP_RUN/database.dump"
+pg_restore --list "$BACKUP_RUN/database.dump"
 ```
 
-使用独立文件名，不覆盖已有恢复点。检查内容/校验和并保存异机副本。
+备份父目录须已存在且权限受限，每次创建新目录，不覆盖已有恢复点。检查内容/校验和并保存异机副本。
 优先恢复到隔离空库验证；目标 URL 必须明确，先应用新目标所需角色/权限。
 例如已准备目标连接串后：
 
@@ -82,7 +90,7 @@ pg_restore --dbname="$RESTORE_DATABASE_URL" --no-owner --no-acl --exit-on-error 
 **已核对的限制**：现有 TABLE_ORDER 不包含 site_notices、live_comp_upload_jobs、password_reset_requests；
 verify_counts 共用同一名单，全部通过也不能证明这些表已迁移。
 旧 app_settings 的通知兼容数据不能代替完整的多通知库。上传任务/重置请求是否迁移还需确定保留政策。
-本次保留导入行为，避免未经数据迁移演练就改变生产工具。完整备份/恢复使用 pg_dump/pg_restore。
+改变导入名单前必须完成隔离数据迁移演练。完整备份/恢复使用 pg_dump/pg_restore。
 
 ## 验证边界
 

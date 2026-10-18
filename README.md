@@ -37,10 +37,12 @@ Compose 自动读取 `.env`，Python CLI 不读取它，连接串须显式传入
 
 ```powershell
 python -m pytest -q
+python scripts/check_repository_safety.py
 git diff --check
 ```
 
 单元测试不要求真实 PostgreSQL；生产前仍须执行真实迁移和完整性检查。
 **现有 SQLite 导入不是全库备份工具**，已知遗漏和恢复边界见 [运维](docs/operations.md)。
 
-[AGENTS.md](AGENTS.md) 提供开发约束；生产拓扑与跨服务更新入口统一在 [Web 运维手册](../jcc-web-service/docs/operations.md)。
+[AGENTS.md](AGENTS.md) 提供开发约束；通用跨服务更新流程见 [Web 运维手册](../jcc-web-service/docs/operations.md)。
+提交前检查、私有资料边界和历史泄露处置见 [仓库安全](docs/repository-security.md)。

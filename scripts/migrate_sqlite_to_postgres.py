@@ -6,6 +6,8 @@ import psycopg
 
 TABLE_ORDER = [
     'users',
+    'automation_accounts',
+    'automation_imports',
     'lineups',
     'lineup_moderation',
     'lineup_moderation_events',

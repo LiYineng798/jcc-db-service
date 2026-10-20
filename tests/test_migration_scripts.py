@@ -16,7 +16,6 @@ def test_table_order_includes_current_tables():
     assert TABLE_ORDER == [
         'users',
         'automation_accounts',
-        'automation_imports',
         'lineups',
         'lineup_moderation',
         'lineup_moderation_events',

@@ -7,7 +7,6 @@ import psycopg
 TABLE_ORDER = [
     'users',
     'automation_accounts',
-    'automation_imports',
     'lineups',
     'lineup_moderation',
     'lineup_moderation_events',
@@ -106,6 +105,8 @@ def migrate_table(sqlite_connection, pg_cursor, table):
     if not table_exists(sqlite_connection, table):
         return 0
     columns = sqlite_columns(sqlite_connection, table)
+    if table == 'automation_accounts':
+        columns = [column for column in columns if column not in {'token_hash', 'token_prefix'}]
     if not columns:
         return 0
     order_sql = ' ORDER BY id' if 'id' in columns else ''

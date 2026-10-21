@@ -126,6 +126,9 @@ CHECKS = [
 
     ('notification actors reference interaction notices and users', "SELECT COUNT(*) FROM notification_actors a LEFT JOIN user_notifications n ON n.id=a.notification_id LEFT JOIN users u ON u.id=a.actor_user_id WHERE n.id IS NULL OR u.id IS NULL OR n.kind NOT IN ('like','favorite','copy') OR n.user_id=a.actor_user_id"),
 
+    ('automation account belongs to an automation user', "SELECT COUNT(*) FROM automation_accounts a LEFT JOIN users u ON u.id=a.user_id WHERE u.id IS NULL OR u.role<>'automation'"),
+    ('deleted automation account is disabled', "SELECT COUNT(*) FROM automation_accounts a JOIN users u ON u.id=a.user_id WHERE a.deleted_at IS NOT NULL AND u.status<>'disabled'"),
+
 ]
 
 

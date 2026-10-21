@@ -15,6 +15,7 @@ def test_table_order_loads_parent_tables_before_children():
 def test_table_order_includes_current_tables():
     assert TABLE_ORDER == [
         'users',
+        'automation_accounts',
         'lineups',
         'lineup_moderation',
         'lineup_moderation_events',

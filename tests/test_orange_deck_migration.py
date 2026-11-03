@@ -44,6 +44,11 @@ def test_migration_enforces_status_portal_cards_and_owner():
     db.execute("INSERT INTO orange_deck_favorites VALUES (2,2,'now')")
     with pytest.raises(sqlite3.IntegrityError):
         db.execute("INSERT INTO orange_deck_favorites VALUES (2,2,'later')")
+    like = "INSERT INTO orange_deck_likes (user_id,deck_id,like_date,created_at) VALUES (2,2,?,'now')"
+    db.execute(like, ('2026-11-03',))
+    db.execute(like, ('2026-11-04',))
+    with pytest.raises(sqlite3.IntegrityError):
+        db.execute(like, ('2026-11-03',))
     with pytest.raises(sqlite3.IntegrityError):
         db.execute("INSERT INTO orange_deck_favorites VALUES (2,99,'now')")
 
@@ -51,7 +56,7 @@ def test_migration_enforces_status_portal_cards_and_owner():
 def test_integrity_checks_cover_deck_references_and_featured_state():
     db = database()
     checks = {label: sql for label, sql in CHECKS if 'orange deck' in label}
-    assert len(checks) == 5
+    assert len(checks) == 6
     db.execute(DECK, (1, '公开', '7250036', '7250046', '7210001', 'unknown', 'published'))
     db.execute("INSERT INTO orange_deck_favorites VALUES (2,1,'now')")
     db.execute('INSERT INTO orange_decks (user_id,name,portal_id,card_version,status,forked_from_id,created_at,updated_at) '
@@ -62,8 +67,8 @@ def test_integrity_checks_cover_deck_references_and_featured_state():
 
 
 def test_import_order_and_identity_restore_include_deck_tables():
-    assert TABLE_ORDER.index('users') < TABLE_ORDER.index('orange_decks') < TABLE_ORDER.index('orange_deck_favorites')
-    assert 'orange_decks' in IDENTITY_TABLES
+    assert TABLE_ORDER.index('users') < TABLE_ORDER.index('orange_decks') < TABLE_ORDER.index('orange_deck_favorites') < TABLE_ORDER.index('orange_deck_likes')
+    assert {'orange_decks', 'orange_deck_likes'} <= IDENTITY_TABLES
     assert 'orange_deck_favorites' not in IDENTITY_TABLES
     db = database()
     db.execute(DECK, (1, '公开', '7250036', '7250046', '7210001', 'unknown', 'published'))

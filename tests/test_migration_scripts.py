@@ -45,6 +45,7 @@ def test_table_order_includes_current_tables():
         'author_favorite_receipts',
         'orange_decks',
         'orange_deck_favorites',
+        'orange_deck_likes',
         'patch_notes',
         'daily_admin_reports',
         'season_release_packages',

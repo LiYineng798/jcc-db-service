@@ -34,6 +34,10 @@ TABLE_ORDER = [
     'user_notifications',
     'notification_actors',
     'author_favorite_receipts',
+    'orange_decks',
+    'orange_deck_favorites',
+    'orange_deck_likes',
+    'orange_deck_copies',
     'patch_notes',
     'daily_admin_reports',
     'season_release_packages',
@@ -65,6 +69,8 @@ IDENTITY_TABLES = {
     'growth_events',
     'guestbook_messages',
     'patch_notes',
+    'orange_decks',
+    'orange_deck_likes',
 }
 
 

@@ -37,6 +37,7 @@ TABLE_ORDER = [
     'orange_decks',
     'orange_deck_favorites',
     'orange_deck_likes',
+    'orange_deck_copies',
     'patch_notes',
     'daily_admin_reports',
     'season_release_packages',

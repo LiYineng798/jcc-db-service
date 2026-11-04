@@ -135,6 +135,7 @@ CHECKS = [
     ('featured orange decks are published', "SELECT COUNT(*) FROM orange_decks WHERE featured=1 AND status<>'published'"),
     ('orange deck favorites reference users and decks', 'SELECT COUNT(*) FROM orange_deck_favorites f LEFT JOIN users u ON u.id=f.user_id LEFT JOIN orange_decks d ON d.id=f.deck_id WHERE u.id IS NULL OR d.id IS NULL'),
     ('orange deck likes reference users and decks', 'SELECT COUNT(*) FROM orange_deck_likes l LEFT JOIN users u ON u.id=l.user_id LEFT JOIN orange_decks d ON d.id=l.deck_id WHERE u.id IS NULL OR d.id IS NULL'),
+    ('deck copies reference orange_decks', 'SELECT COUNT(*) FROM orange_deck_copies c LEFT JOIN orange_decks d ON d.id=c.deck_id WHERE d.id IS NULL'),
 
 ]
 

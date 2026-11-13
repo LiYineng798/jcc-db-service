@@ -137,6 +137,85 @@ CHECKS = [
     ('orange deck likes reference users and decks', 'SELECT COUNT(*) FROM orange_deck_likes l LEFT JOIN users u ON u.id=l.user_id LEFT JOIN orange_decks d ON d.id=l.deck_id WHERE u.id IS NULL OR d.id IS NULL'),
     ('deck copies reference orange_decks', 'SELECT COUNT(*) FROM orange_deck_copies c LEFT JOIN orange_decks d ON d.id=c.deck_id WHERE d.id IS NULL'),
 
+    ('orange deck attribution references users', '''
+        SELECT COUNT(*) FROM orange_decks d
+        LEFT JOIN users p ON p.id=d.provided_by_user_id
+        LEFT JOIN users a ON a.id=d.published_by_user_id
+        WHERE (d.provided_by_user_id IS NOT NULL AND p.id IS NULL)
+           OR (d.published_by_user_id IS NOT NULL AND a.id IS NULL)
+           OR (d.origin_type='submission' AND d.provided_by_user_id IS NULL)
+           OR (d.origin_type='direct' AND d.provided_by_user_id IS NOT NULL)
+    '''),
+    ('deck submissions reference users and decks', '''
+        SELECT COUNT(*) FROM orange_deck_submissions s
+        LEFT JOIN users u ON u.id=s.submitter_user_id
+        LEFT JOIN users a ON a.id=s.assigned_admin_id
+        LEFT JOIN orange_decks d ON d.id=s.deck_id
+        LEFT JOIN orange_decks dup ON dup.id=s.duplicate_of_deck_id
+        WHERE u.id IS NULL OR (s.assigned_admin_id IS NOT NULL AND a.id IS NULL)
+           OR (s.deck_id IS NOT NULL AND d.id IS NULL)
+           OR (s.duplicate_of_deck_id IS NOT NULL AND dup.id IS NULL)
+    '''),
+    ('submission deck keeps season and provider', '''
+        SELECT COUNT(*) FROM orange_deck_submissions s JOIN orange_decks d ON d.id=s.deck_id
+        WHERE d.season_id<>s.season_id OR d.origin_type<>'submission'
+           OR d.provided_by_user_id IS NULL OR d.provided_by_user_id<>s.submitter_user_id
+    '''),
+    ('managed decks have their source submission', '''
+        SELECT COUNT(*) FROM orange_decks d LEFT JOIN orange_deck_submissions s ON s.deck_id=d.id
+        WHERE d.origin_type='submission' AND s.id IS NULL
+    '''),
+    ('accepted submissions were published at least once', '''
+        SELECT COUNT(*) FROM orange_deck_submissions s JOIN orange_decks d ON d.id=s.deck_id
+        WHERE s.status='published' AND d.published_at IS NULL
+    '''),
+    ('duplicate deck belongs to submission season', '''
+        SELECT COUNT(*) FROM orange_deck_submissions s JOIN orange_decks d ON d.id=s.duplicate_of_deck_id
+        WHERE d.season_id<>s.season_id
+    '''),
+    ('submission events reference submissions and actors', '''
+        SELECT COUNT(*) FROM orange_deck_submission_events e
+        LEFT JOIN orange_deck_submissions s ON s.id=e.submission_id
+        LEFT JOIN users u ON u.id=e.actor_user_id
+        WHERE s.id IS NULL OR (e.actor_user_id IS NOT NULL AND u.id IS NULL)
+    '''),
+    ('submission event versions are complete and current', '''
+        SELECT COUNT(*) FROM orange_deck_submissions s
+        LEFT JOIN (SELECT submission_id, COUNT(*) AS n, MIN(submission_version) AS first_version,
+                          MAX(submission_version) AS last_version
+                   FROM orange_deck_submission_events GROUP BY submission_id) h ON h.submission_id=s.id
+        LEFT JOIN orange_deck_submission_events e ON e.submission_id=s.id AND e.submission_version=s.version
+        WHERE h.n IS NULL OR h.n<>s.version OR h.first_version<>1 OR h.last_version<>s.version
+           OR e.to_status<>s.status
+    '''),
+    ('submission event history follows preceding state', '''
+        SELECT COUNT(*) FROM orange_deck_submission_events e
+        LEFT JOIN orange_deck_submission_events p
+            ON p.submission_id=e.submission_id AND p.submission_version=e.submission_version-1
+        WHERE (e.submission_version=1 AND (e.action<>'submit' OR e.from_status IS NOT NULL OR e.to_status<>'pending'))
+           OR (e.submission_version>1 AND (p.id IS NULL OR e.from_status IS NULL OR e.from_status<>p.to_status))
+    '''),
+    ('submission notification belongs to submitter', '''
+        SELECT COUNT(*) FROM user_notifications n
+        LEFT JOIN orange_deck_submissions s ON s.id=n.deck_submission_id
+        WHERE n.kind='deck_submission' AND (s.id IS NULL OR n.user_id<>s.submitter_user_id)
+    '''),
+    ('deck activity references users and decks', '''
+        SELECT COUNT(*) FROM orange_deck_activity_events e
+        LEFT JOIN orange_decks d ON d.id=e.deck_id LEFT JOIN users u ON u.id=e.user_id
+        WHERE d.id IS NULL OR (e.user_id IS NOT NULL AND u.id IS NULL)
+    '''),
+    ('deck copy actions reference matching decks', '''
+        SELECT COUNT(*) FROM copy_action_events e LEFT JOIN orange_decks d ON d.id=e.deck_id
+        WHERE e.target_type='orange_deck' AND (d.id IS NULL OR e.target_id<>CAST(d.id AS TEXT)
+            OR e.season_id IS NULL OR e.season_id<>d.season_id)
+    '''),
+    ('deck visits reference users and decks', '''
+        SELECT COUNT(*) FROM orange_deck_visit_events e
+        LEFT JOIN orange_decks d ON d.id=e.deck_id LEFT JOIN users u ON u.id=e.user_id
+        WHERE (e.deck_id IS NOT NULL AND d.id IS NULL) OR (e.user_id IS NOT NULL AND u.id IS NULL)
+    '''),
+
 ]
 
 

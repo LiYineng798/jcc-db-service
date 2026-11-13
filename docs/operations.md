@@ -40,6 +40,7 @@ psql "$JCC_DATABASE_URL" -c 'SELECT version, applied_at FROM schema_migrations O
 
 - Web SQLite 的 db_schema/db_migrations 及专项 schema 必须同步。
 - 新表检查 TABLE_ORDER 与 identity 恢复；完整性检查按实际引用增加，不能只做行数检查。
+- 卡组投稿与运营事件的结构、接入边界见 [数据契约](deck-submission-data.md)。
 - 0015 的资料发布元数据依赖 Web uploads/releases；新增赛季本身不新增 DB 表。
 - 0016 的审核状态与 lineups.status 联动；提案通过前不替换原内容，已读 revision 独立，
   处理事件保留。详细业务规则只在 [Web 审核文档](../../jcc-web-service/docs/lineup-moderation.md) 维护。

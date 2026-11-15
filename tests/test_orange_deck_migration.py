@@ -55,8 +55,13 @@ def test_migration_enforces_status_portal_cards_and_owner():
 
 def test_integrity_checks_cover_deck_references_and_featured_state():
     db = database()
-    checks = {label: sql for label, sql in CHECKS if 'orange deck' in label}
-    assert len(checks) == 6
+    # This fixture ends at 0025; later migrations have their own integrity tests.
+    labels = (
+        'orange deck owner exists', 'orange deck fork source exists',
+        'public orange decks hold three distinct cards', 'featured orange decks are published',
+        'orange deck favorites reference users and decks', 'orange deck likes reference users and decks',
+    )
+    checks = {label: dict(CHECKS)[label] for label in labels}
     db.execute(DECK, (1, '公开', '7250036', '7250046', '7210001', 'unknown', 'published'))
     db.execute("INSERT INTO orange_deck_favorites VALUES (2,1,'now')")
     db.execute('INSERT INTO orange_decks (user_id,name,portal_id,card_version,status,forked_from_id,created_at,updated_at) '

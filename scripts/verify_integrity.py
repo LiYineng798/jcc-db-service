@@ -215,6 +215,11 @@ CHECKS = [
         LEFT JOIN orange_decks d ON d.id=e.deck_id LEFT JOIN users u ON u.id=e.user_id
         WHERE (e.deck_id IS NOT NULL AND d.id IS NULL) OR (e.user_id IS NOT NULL AND u.id IS NULL)
     '''),
+    ('toolbox_items.updated_by -> users.id', '''
+        SELECT COUNT(*) FROM toolbox_items t
+        LEFT JOIN users u ON u.id = t.updated_by
+        WHERE t.updated_by IS NOT NULL AND u.id IS NULL
+    '''),
 
 ]
 

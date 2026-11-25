@@ -57,6 +57,7 @@ def test_table_order_includes_current_tables():
         'season_import_jobs',
         'season_active_releases',
         'season_release_events',
+        'toolbox_items',
     ]
 
 

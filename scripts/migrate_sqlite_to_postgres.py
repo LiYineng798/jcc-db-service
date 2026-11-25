@@ -48,6 +48,7 @@ TABLE_ORDER = [
     'season_import_jobs',
     'season_active_releases',
     'season_release_events',
+    'toolbox_items',
 ]
 
 IDENTITY_TABLES = {
